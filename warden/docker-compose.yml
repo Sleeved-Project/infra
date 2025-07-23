@@ -1,0 +1,29 @@
+services:
+  api:
+    image: sleevedmanager/warden:v1.0.0
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysql
+    env_file:
+      - .env
+    networks:
+      - default
+      - sleeved-network
+    container_name: warden-api
+
+  mysql:
+    image: mysql:8
+    ports:
+      - "3310:3306"
+    env_file:
+      - .env
+    volumes:
+      - /mnt/securedata/warden/db:/var/lib/mysql
+    networks:
+      - default
+
+networks:
+  default:
+  sleeved-network:
+    external: true

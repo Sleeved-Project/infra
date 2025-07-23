@@ -1,0 +1,65 @@
+version: "3"
+
+tasks:
+  default:
+    desc: Display available commands
+    cmds:
+      - task --list-all
+    silent: true
+
+  # Database commands
+  db:migrate:
+    desc: Run database migrations
+    cmds:
+      - docker compose exec api node ace migration:run
+
+  db:rollback:
+    desc: Rollback the last migration
+    cmds:
+      - docker compose exec api node ace migration:rollback
+
+  # Setup commands
+  setup:
+    desc: Setup the application environment
+    cmds:
+      - task: network:create
+      - task: start
+
+  # Network commands
+  network:create:
+    desc: Create the external network if it does not exist
+    cmds:
+      - docker network inspect sleeved-network || docker network create sleeved-network
+
+  network:info:
+    desc: Display network information
+    cmds:
+      - docker network ls
+      - docker network inspect sleeved-network
+
+  network:remove:
+    desc: Remove the external network
+    cmds:
+      - docker network rm sleeved-network
+
+  # Application commands
+  start:
+    desc: Start all services in standalone
+    cmds:
+      - docker compose up -d
+
+  stop:
+    desc: Stop all services
+    cmds:
+      - docker compose down {{.CLI_ARGS}}
+
+  restart:
+    desc: Restart all services
+    cmds:
+      - task: stop
+      - task: start
+
+  logs:
+    desc: Show application logs
+    cmds:
+      - docker compose logs -f api
