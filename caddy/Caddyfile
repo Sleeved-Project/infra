@@ -1,0 +1,10 @@
+sleeved.fr {
+  # Serve the static landing page
+  root * /srv/www/landing
+  file_server
+
+  # Reverse proxy for the 'warden' microservice
+	handle_path /warden/* {
+		reverse_proxy localhost:8081
+	}
+}
