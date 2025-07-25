@@ -25,7 +25,7 @@ jobs:
 
       - name: Replace tag in docker-compose.yml
         run: |
-          sed -i "s|warden:[a-zA-Z0-9.\-]*|warden:${{ github.event.inputs.version || github.event.client_payload.version }}|g" ./apps/warden/docker-compose.yml
+          sed -i "s|warden:[a-zA-Z0-9.\-]*|warden:${{ github.event.inputs.version || github.event.client_payload.version }}|g" ./warden/docker-compose.yml
 
       - name: Commit and push
         run: |
