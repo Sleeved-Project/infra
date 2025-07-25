@@ -13,26 +13,16 @@ on:
 jobs:
   update-tag:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Create update branch
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git checkout -b update-warden-${{ github.event.inputs.version || github.event.client_payload.version }}
-
       - name: Replace tag in docker-compose.yml
         run: |
           sed -i "s|warden:[a-zA-Z0-9.\-]*|warden:${{ github.event.inputs.version || github.event.client_payload.version }}|g" ./warden/docker-compose.yml
-
-      - name: Commit and push
-        run: |
-          git remote set-url origin https://x-access-token:${{secrets.INFRA_TRIGGER_TOKEN}}@github.com/Sleeved-Project/infra.git
-          git add .
-          git commit -m "chore: update warden image to ${{ github.event.inputs.version || github.event.client_payload.version }}"
-          git push origin update-warden-${{ github.event.inputs.version || github.event.client_payload.version }}
 
       - name: Create PR
         uses: peter-evans/create-pull-request@v5
@@ -41,3 +31,4 @@ jobs:
           branch: update-warden-${{ github.event.inputs.version || github.event.client_payload.version }}
           title: "🚀 Deploy warden ${{ github.event.inputs.version || github.event.client_payload.version }}"
           body: "Auto-generated PR to update `warden` image tag to `${{ github.event.inputs.version || github.event.client_payload.version }}`"
+          commit-message: "chore: update warden image to ${{ github.event.inputs.version || github.event.client_payload.version }}"
