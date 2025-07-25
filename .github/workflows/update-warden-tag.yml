@@ -29,6 +29,7 @@ jobs:
 
       - name: Commit and push
         run: |
+          git remote set-url origin https://x-access-token:${GH_PAT_INFRA}@github.com/Sleeved-Project/infra.git
           git add .
           git commit -m "chore: update warden image to ${{ github.event.inputs.version || github.event.client_payload.version }}"
           git push origin update-warden-${{ github.event.inputs.version || github.event.client_payload.version }}
