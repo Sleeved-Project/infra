@@ -2,34 +2,27 @@ name: 🚀 Deploy Warden to VPS
 
 on:
   workflow_dispatch:
-    inputs:
-      branch:
-        description: "Infra branch to deploy from"
-        required: true
-        default: "main"
 
 jobs:
   deploy:
-    name: 🚀 Deploy Warden
+    name: Deploy Warden
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout infra repo
+      - name: Checkout infra repo
         uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.inputs.branch }}
 
-      - name: 📤 Upload infra files to VPS
+      - name: Upload infra files to VPS
         uses: appleboy/scp-action@v0.1.6
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_SSH_PORT }}
-          source: "./apps/warden/*"
+          source: "./warden/*"
           target: "/srv/apps/warden"
 
-      - name: 🐳 Deploy container on VPS
+      - name: Deploy container on VPS
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -41,6 +34,9 @@ jobs:
             echo "📦 Stopping old containers..."
             docker-compose down
             echo "📥 Pulling latest image..."
-            docker-compose pull warden
+            docker-compose pull
             echo "🚀 Starting service..."
-            docker-compose up -d warden
+            task setup
+            echo "💾 Migrate database..."
+            task db:migrate
+            echo "✅ Warden deployed successfully!"
