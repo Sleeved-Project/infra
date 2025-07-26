@@ -21,7 +21,9 @@ jobs:
           passphrase: ${{ secrets.VPS_SSH_PASSPHRASE }}
           port: ${{ secrets.VPS_SSH_PORT }}
           source: "./warden/*"
-          target: "/srv/apps/warden"
+          target: "/srv/apps/"
+          overwrite: true
+          rm: false
 
       - name: Deploy container on VPS
         uses: appleboy/ssh-action@v0.1.8
