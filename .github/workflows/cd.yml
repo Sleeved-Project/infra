@@ -2,6 +2,10 @@ name: 🚀 Deploy Warden to VPS
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Version tag (e.g. v1.2.3)"
+        required: true
 
 jobs:
   deploy:
@@ -42,15 +46,10 @@ jobs:
             echo "🚀 Starting service..."
             task setup
             echo "💾 Migrate database..."
-            task db:migrate
-
-            # Extract version from docker-compose.yml
-            VERSION=$(grep -oP 'warden:\K[^"]*' docker-compose.yml | head -1)
-            echo "DEPLOYED_VERSION=$VERSION" >> $GITHUB_ENV
-
+            task db:migrate          
             echo "✅ Warden deployed successfully!"
 
       - name: Add version to job summary
         if: success()
         run: |
-          echo "## ✅ Deploy version: \`${{ env.DEPLOYED_VERSION }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ Deploy version: \`${{ github.event.inputs.version }}\`" >> $GITHUB_STEP_SUMMARY
