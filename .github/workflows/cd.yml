@@ -53,4 +53,4 @@ jobs:
       - name: Add version to job summary
         if: success()
         run: |
-          echo "## ✅ Deploy version: \`${{ github.event.inputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ Deploy version: \`${{ env.DEPLOYED_VERSION }}\`" >> $GITHUB_STEP_SUMMARY
