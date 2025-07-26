@@ -11,12 +11,12 @@ tasks:
   db:migrate:
     desc: Run database migrations
     cmds:
-      - docker compose exec api node ace migration:run
+      - docker compose exec api node ace migration:run --force
 
   db:rollback:
     desc: Rollback the last migration
     cmds:
-      - docker compose exec api node ace migration:rollback
+      - docker compose exec api node ace migration:rollback --force
 
   # Setup commands
   setup:
