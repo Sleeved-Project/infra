@@ -43,4 +43,14 @@ jobs:
             task setup
             echo "💾 Migrate database..."
             task db:migrate
+
+            # Extract version from docker-compose.yml
+            VERSION=$(grep -oP 'warden:\K[^"]*' docker-compose.yml | head -1)
+            echo "DEPLOYED_VERSION=$VERSION" >> $GITHUB_ENV
+
             echo "✅ Warden deployed successfully!"
+
+      - name: Add version to job summary
+        if: success()
+        run: |
+          echo "## ✅ Deploy version: \`${{ github.event.inputs.version }}\`" >> $GITHUB_STEP_SUMMARY
