@@ -40,9 +40,9 @@ jobs:
           script: |
             cd /srv/apps/warden
             echo "📦 Stopping old containers..."
-            docker-compose down
+            docker compose down
             echo "📥 Pulling latest image..."
-            docker-compose pull
+            docker compose pull
             echo "🚀 Starting service..."
             task setup
             echo "💾 Migrate database..."
