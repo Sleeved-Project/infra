@@ -1,2 +1,5 @@
 # Environnement
 .env
+
+# Database
+*data_dump.sql

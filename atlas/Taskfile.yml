@@ -8,6 +8,16 @@ tasks:
     silent: true
 
   # Database commands
+  db:import:
+    desc: Import database from dump file
+    cmds:
+      - echo "Importing database from dump file..."
+      - |
+        source .env && \
+        echo "🔄 Starting import... " && \
+        (docker compose exec -T mysql mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $DB_DATABASE < ./sleeved_db_data_dump.sql 2>&1) && \
+        echo "✅ Import completed with success !"
+
   db:migrate:
     desc: Run database migrations
     cmds:
@@ -22,37 +32,35 @@ tasks:
   setup:
     desc: Setup the application environment
     cmds:
-      - task: network:create
+      - task: networks:create
       - task: build
       - task: start
 
-  # Network commands
-  network:create:
+  # Networks commands
+  networks:create:
     desc: Create the external network if it does not exist
     cmds:
       - docker network inspect sleeved-network || docker network create sleeved-network
+      - docker network inspect looter-network || docker network create looter-network
 
-  network:info:
+  networks:info:
     desc: Display network information
     cmds:
       - docker network ls
       - docker network inspect sleeved-network
+      - docker network inspect looter-network
 
-  network:remove:
+  networks:remove:
     desc: Remove the external network
     cmds:
       - docker network rm sleeved-network
+      - docker network rm looter-network
 
   # Application commands
   start:
-    desc: Start all services in standalone
+    desc: Start all services
     cmds:
       - docker compose up -d
-
-  build:
-    desc: Build all services
-    cmds:
-      - docker compose build
 
   stop:
     desc: Stop all services
@@ -64,6 +72,19 @@ tasks:
     cmds:
       - task: stop
       - task: start
+
+  build:
+    desc: Build the application
+    cmds:
+      - docker compose build
+
+  rebuild:
+    desc: Rebuild and restart
+    cmds:
+      - task: stop
+      - task: build
+      - task: start
+      - task: logs
 
   logs:
     desc: Show application logs
