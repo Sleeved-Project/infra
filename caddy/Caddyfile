@@ -7,4 +7,9 @@ sleeved.fr {
 	handle_path /warden/* {
 		reverse_proxy localhost:8081
 	}
+
+  # Reverse proxy for the 'atlas' microservice
+	handle_path /atlas/* {
+		reverse_proxy localhost:8082
+	}
 }
