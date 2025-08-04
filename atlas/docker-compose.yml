@@ -21,7 +21,7 @@ services:
       - .env
     volumes:
       - /mnt/securedata/atlas/db:/var/lib/mysql
-      - /mnt/securedata/atlas/dump/sleeved_db_structure_dump.sql:/docker-entrypoint-initdb.d/sleeved_db_structure_dump.sql
+      - /mnt/securedata/atlas/dumps/sleeved_db_structure_dump.sql:/docker-entrypoint-initdb.d/sleeved_db_structure_dump.sql
     healthcheck:
       test:
         [
