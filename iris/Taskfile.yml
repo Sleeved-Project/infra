@@ -1,0 +1,116 @@
+version: "3"
+
+tasks:
+  default:
+    desc: Display available commands
+    cmds:
+      - task --list-all
+    silent: true
+
+  # Setup commands
+  setup:
+    desc: Complete first-time setup (network, build, start, run migrations, show info)
+    cmds:
+      - echo ">> Starting Iris setup process..."
+      - task: networks:create
+      - task: build
+      - task: start
+      - echo ">> API available at http://localhost:8083/docs"
+      - echo ">> Database connection localhost:3311 (user/password)"
+
+  # Networks commands
+  networks:create:
+    desc: Create the external network if it does not exist
+    cmds:
+      - docker network inspect sleeved-network || docker network create sleeved-network
+      - docker network inspect looter-network || docker network create looter-network
+
+  networks:info:
+    desc: Display network information
+    cmds:
+      - docker network ls
+      - docker network inspect sleeved-network
+      - docker network inspect looter-network
+
+  networks:remove:
+    desc: Remove the external network
+    cmds:
+      - docker network rm sleeved-network
+      - docker network rm looter-network
+
+  # Application commands
+  build:
+    desc: Build the Docker containers
+    cmds:
+      - docker compose build
+
+  start:
+    desc: Start the application
+    cmds:
+      - docker compose up -d
+
+  stop:
+    desc: Stop the application
+    cmds:
+      - docker compose down
+
+  logs:
+    desc: View logs
+    cmds:
+      - docker compose logs -f
+
+  shell:
+    desc: Open a shell in the API container
+    cmds:
+      - docker compose exec api bash
+
+  restart:
+    desc: Restart the application
+    cmds:
+      - task: stop
+      - task: start
+      - task: logs
+
+  rebuild:
+    desc: Rebuild and restart
+    cmds:
+      - task: stop
+      - task: build
+      - task: start
+      - task: logs
+
+  # Database commands
+  db:import:
+    desc: Import database from dump file
+    cmds:
+      - echo "Importing database from dump file..."
+      - |
+        source .env && \
+        echo "🔄 Starting import... " && \
+        (docker compose exec -T mysql mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $MYSQL_DATABASE < /mnt/securedata/atlas/dumps/iris_db_data_dump.sql 2>&1) && \
+        echo "✅ Import completed with success !"
+
+  db:migrate:apply:
+    desc: Apply all pending migrations
+    cmds:
+      - docker compose exec api alembic upgrade head
+
+  db:migrate:revert:
+    desc: Rollback the last migration
+    cmds:
+      - docker compose exec api alembic downgrade -1
+
+  db:migrate:history:
+    desc: Show migration history
+    cmds:
+      - docker compose exec api alembic history --verbose
+
+  db:migrate:current:
+    desc: Show current migration revision
+    cmds:
+      - docker compose exec api alembic current
+
+  db:shell:
+    desc: Open a MySQL shell
+    cmds:
+      - docker compose exec mysql mysql -u user -ppassword iris_db

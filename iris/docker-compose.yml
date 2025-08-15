@@ -1,0 +1,55 @@
+services:
+  api:
+    image: sleevedmanager/iris:v1.0.0
+    ports:
+      - "8083:8083"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    env_file:
+      - .env
+    restart: always
+    command: uvicorn main:app --host 0.0.0.0 --port 8083 --reload
+    networks:
+      - default
+      - sleeved-network
+      - looter-network
+    container_name: iris-api
+
+  mysql:
+    image: mysql:8.0
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "3311:3306"
+    volumes:
+      - /mnt/securedata/iris/db:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p${MYSQL_ROOT_PASSWORD}",
+          "--silent",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks:
+      - default
+      - looter-network
+    container_name: iris-db
+
+networks:
+  default:
+  sleeved-network:
+    external: true
+  looter-network:
+    external: true
