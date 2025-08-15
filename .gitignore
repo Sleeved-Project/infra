@@ -1,6 +1,7 @@
 # Environnement
 .env
 .DS_Store
+.DS_Store?
 
 # Database
 *data_dump.sql
