@@ -1,0 +1,55 @@
+name: 🚀 Deploy Iris to VPS
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version tag (e.g. v1.2.3)"
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy iris
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout infra repo
+        uses: actions/checkout@v3
+
+      - name: Upload infra files to VPS
+        uses: appleboy/scp-action@v0.1.6
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          passphrase: ${{ secrets.VPS_SSH_PASSPHRASE }}
+          port: ${{ secrets.VPS_SSH_PORT }}
+          source: "./iris/*"
+          target: "/srv/apps/"
+          overwrite: true
+          rm: false
+
+      - name: Deploy container on VPS
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          passphrase: ${{ secrets.VPS_SSH_PASSPHRASE }}
+          port: ${{ secrets.VPS_SSH_PORT }}
+          script: |
+            cd /srv/apps/iris
+            echo "📦 Stopping old containers..."
+            docker compose down
+            echo "📥 Pulling latest image..."
+            docker compose pull
+            echo "🚀 Starting service..."
+            task setup     
+            echo "💾 Migrate database..."
+            task db:migrate:apply        
+            echo "✅ iris deployed successfully!"
+
+      - name: Add version to job summary
+        if: success()
+        run: |
+          echo "## ✅ Deploy version: \`${{ github.event.inputs.version }}\`" >> $GITHUB_STEP_SUMMARY
