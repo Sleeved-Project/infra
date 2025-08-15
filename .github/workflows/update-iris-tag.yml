@@ -1,0 +1,34 @@
+name: 🔧 Update Iris Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "iris version to deploy (ex: v1.2.3)"
+        required: true
+
+  repository_dispatch:
+    types: [update-iris-tag]
+
+jobs:
+  update-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Replace tag in docker-compose.yml
+        run: |
+          sed -i "s|iris:[a-zA-Z0-9.\-]*|iris:${{ github.event.inputs.version || github.event.client_payload.version }}|g" ./iris/docker-compose.yml
+
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: update-iris-${{ github.event.inputs.version || github.event.client_payload.version }}
+          title: "🚀 Deploy iris ${{ github.event.inputs.version || github.event.client_payload.version }}"
+          body: "Auto-generated PR to update `iris` image tag to `${{ github.event.inputs.version || github.event.client_payload.version }}`"
+          commit-message: "chore: update iris image to ${{ github.event.inputs.version || github.event.client_payload.version }}"
