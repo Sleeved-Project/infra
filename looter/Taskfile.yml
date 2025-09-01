@@ -116,7 +116,7 @@ tasks:
       - |
         source .env && \
         echo "🔄 Starting import... " && \
-        (docker compose exec -T staging-db mysql -uroot -p"$LOOTER_STAGING_DB__ROOT_PASSWORD" $LOOTER_STAGING_DB_NAME < /mnt/securedata/looter/scrap/dumps/staging_db_structure_dump.sql 2>&1) && \
+        (docker compose exec -T staging-db mysql -uroot -p"$LOOTER_STAGING_DB__ROOT_PASSWORD" $LOOTER_STAGING_DB_NAME < /mnt/securedata/looter/staging/dumps/staging_db_structure_dump.sql 2>&1) && \
         echo "✅ Import completed with success !"
 
   # Scheduler
