@@ -1,0 +1,92 @@
+services:
+  app:
+    image: sleevedmanager/looter:v1.0.0
+    env_file: .env
+    networks:
+      - default
+      - looter-network
+    depends_on:
+      scrap-db:
+        condition: service_healthy
+      staging-db:
+        condition: service_healthy
+    command:
+      ["java", "-jar", "app.jar", "--spring.profiles.active=local,scheduler"]
+
+  # Service séparé pour les jobs one-shot
+  job-runner:
+    image: sleevedmanager/looter:v1.0.0
+    env_file: .env
+    networks:
+      - default
+      - looter-network
+    depends_on:
+      scrap-db:
+        condition: service_healthy
+      staging-db:
+        condition: service_healthy
+    profiles:
+      - job # Service utilisé seulement pour les jobs
+
+  scrap-db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${LOOTER_SCRAP_DB_ROOT_PASSWORD}
+      MYSQL_USER: ${LOOTER_SCRAP_DB_USERNAME}
+      MYSQL_PASSWORD: ${LOOTER_SCRAP_DB_PASSWORD}
+      MYSQL_DATABASE: ${LOOTER_SCRAP_DB_NAME}
+    volumes:
+      - /mnt/securedata/looter/scrap/db:/var/lib/mysql
+    ports:
+      - "3308:3306"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p${LOOTER_SCRAP_DB_ROOT_PASSWORD}",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - default
+
+  staging-db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${LOOTER_STAGING_DB__ROOT_PASSWORD}
+      MYSQL_USER: ${LOOTER_STAGING_DB_USERNAME}
+      MYSQL_PASSWORD: ${LOOTER_STAGING_DB_PASSWORD}
+      MYSQL_DATABASE: ${LOOTER_STAGING_DB_NAME}
+    volumes:
+      - /mnt/securedata/looter/staging/db:/var/lib/mysql
+    ports:
+      - "3309:3306"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p${LOOTER_STAGING_DB_ROOT_PASSWORD}",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - default
+
+networks:
+  default:
+  looter-network:
+    external: true

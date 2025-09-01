@@ -12,9 +12,4 @@ sleeved.fr {
 	handle_path /atlas/* {
 		reverse_proxy localhost:8082
 	}
-
-	# Reverse proxy for the 'iris' microservice
-	handle_path /iris/* {
-		reverse_proxy localhost:8083
-	}
 }
