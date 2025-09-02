@@ -1,0 +1,137 @@
+version: "3"
+
+tasks:
+  default:
+    desc: Display available commands
+    cmds:
+      - task --list-all
+    silent: true
+
+  # Setup Commandes
+  setup:
+    desc: Build images, start database services and scheduler
+    cmds:
+      - |
+        docker compose build
+        docker compose up -d scrap-db staging-db app
+        echo "✅ All services are running, including persistent Looter app"
+        echo "  - Import database with '<service-db>:import' command."
+        echo "  - Run a job with 'task run-job job=<jobName>' command."
+
+  build:
+    desc: Build docker images
+    cmds:
+      - docker compose build
+
+  build-job-runner:
+    desc: Build docker images
+    cmds:
+      - docker compose build --no-cache job-runner
+
+  down:
+    desc: Stop all services
+    cmds:
+      - docker compose down
+
+  start:
+    desc: Start the Looter scheduler service
+    cmds:
+      - docker compose up -d app
+      - echo "✅ Looter scheduler started in persistent mode"
+
+  status:
+    desc: Check scheduler status and health
+    cmds:
+      - echo "📊 Scheduler Status:"
+      - docker compose ps app
+      - echo "🏥 Health Status:"
+      - docker inspect app --format='{{.State.Health.Status}}' 2>/dev/null || echo "Health check starting..."
+      - echo "📋 Recent logs:"
+      - docker compose logs app --tail=20
+
+  restart:
+    desc: Restart the scheduler (useful if it becomes unresponsive)
+    cmds:
+      - docker compose restart app
+      - echo "🔄 Scheduler restarted"
+
+  stop:
+    desc: Stop the Looter scheduler service
+    cmds:
+      - docker compose stop app
+      - echo "🛑 Looter scheduler stopped"
+
+  jobs:
+    desc: Show jobs available in the batch application
+    cmds:
+      - |
+        echo "=== Jobs available ==="
+        echo "- hashingCardImageJob: Hash all card images and save them into iris database"
+        echo "- scrapingCardJob: Scrap all cards from tcgAPI"
+        echo "- scrapingCardJobWithoutApi: Scrap all cards from using only staging database"
+        echo "- scrapingPriceJob: Scrap all today prices from tcgAPI"
+        echo "- scrapingPriceJobWithoutApi: Scrap all prices using only staging database"
+    silent: true
+
+  run-job:
+    desc: Run a specific job in the batch application, use `task jobs` to see available jobs
+    params:
+      - name: job
+        desc: Job to run
+        type: choice
+        options:
+          - hashingCardImageJob
+          - scrapingCardJob
+          - scrapingCardJobWithoutApi
+          - scrapingPriceJob
+          - scrapingPriceJobWithoutApi
+        default: scrapingPriceJob
+      - name: profile
+        desc: Profil to use for the job
+        type: choice
+        options:
+          - local
+          - prod
+          - test
+        default: local
+    cmds:
+      - echo "📦 Running {{.job}} with profile {{.profile}} using job-runner..."
+      - docker compose run --rm job-runner java -jar app.jar --job.name={{.job}} --spring.profiles.active={{.profile}} --spring.main.web-application-type=none
+
+  # Database Commandes
+  scrap-db:import:
+    desc: Import scrap_db database from dump file
+    cmds:
+      - echo "Importing scrap_db database from dump file..."
+      - |
+        source .env && \
+        echo "🔄 Starting import... " && \
+        (docker compose exec -T scrap-db mysql -uroot -p"$LOOTER_SCRAP_DB_ROOT_PASSWORD" $LOOTER_SCRAP_DB_NAME < /mnt/securedata/looter/scrap/dumps/scrap_db_structure_dump.sql 2>&1) && \
+        echo "✅ Import completed with success !"
+
+  staging-db:import:
+    desc: Import staging_db database from dump file
+    cmds:
+      - echo "Importing staging_db database from dump file..."
+      - |
+        source .env && \
+        echo "🔄 Starting import... " && \
+        (docker compose exec -T staging-db mysql -uroot -p"$LOOTER_STAGING_DB_ROOT_PASSWORD" $LOOTER_STAGING_DB_NAME < /mnt/securedata/looter/staging/dumps/staging_db_structure_dump.sql 2>&1) && \
+        echo "✅ Import completed with success !"
+
+  # Scheduler
+  scheduler:
+    desc: Show scheduled jobs and their periodicity
+    cmds:
+      - |
+        echo "=== Scheduled Jobs (Spring Scheduler) ==="
+        echo "- scrapingPriceJob: all days at 2am"
+        echo "- scrapingCardJob: all three months at 3am"
+        echo "- hashingCardImageJob: all three months at 4am (after scrapingCardJob)"
+    silent: true
+
+  scheduler:status:
+    desc: Show last and next scheduled run for each job
+    cmds:
+      - ./scheduler_status.sh
+    silent: false
