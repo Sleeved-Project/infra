@@ -119,6 +119,16 @@ tasks:
         (docker compose exec -T staging-db mysql -uroot -p"$LOOTER_STAGING_DB_ROOT_PASSWORD" $LOOTER_STAGING_DB_NAME < /mnt/securedata/looter/staging/dumps/staging_db_structure_dump.sql 2>&1) && \
         echo "✅ Import completed with success !"
 
+  staging-db:export:
+    desc: Export staging_db database into dump file
+    cmds:
+      - echo "Exporting staging_db database into staging_db_data_dump.sql..."
+      - |
+        source .env && \
+        echo "🔄 Starting export... " && \
+        (docker compose exec -T staging-db mysqldump --databases $LOOTER_STAGING_DB_NAME -uroot -p"$LOOTER_STAGING_DB_ROOT_PASSWORD" > ./staging_db_data_dump.sql 2>/dev/null) && \
+        echo "✅ Export completed with success into ./staging_db_data_dump.sql !"
+
   # Scheduler
   scheduler:
     desc: Show scheduled jobs and their periodicity
