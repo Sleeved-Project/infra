@@ -32,25 +32,25 @@ for job in scrapingPriceJob scrapingCardJob hashingCardImageJob; do
 
   if date --version >/dev/null 2>&1; then
     # GNU date (Linux)
-    add_day() { date -d "$1 +1 day" "+%Y-%m-%d 02:00:00"; }
+    add_day() { date -d "$1 +1 day" "+%Y-%m-%d 09:00:00"; }
   else
     # BSD date (macOS)
-    add_day() { date -v+1d -jf "$DATE_FMT" "$1" "+%Y-%m-%d 02:00:00"; }
+    add_day() { date -v+1d -jf "$DATE_FMT" "$1" "+%Y-%m-%d 09:00:00"; }
   fi
 
   case $job in
     scrapingPriceJob)
       if [ -z "$last_run" ]; then
-        next_run=$(date "+%Y-%m-%d 02:00:00")
+        next_run=$(date "+%Y-%m-%d 09:00:00")
       else
         next_run=$(add_day "$last_run")
       fi
       ;;
     scrapingCardJob)
-      next_run=$(get_next_quarter_date "03:00:00")
+      next_run=$(get_next_quarter_date "09:30:00")
       ;;
     hashingCardImageJob)
-      next_run=$(get_next_quarter_date "04:00:00")
+      next_run=$(get_next_quarter_date "10:00:00")
       ;;
   esac
 
