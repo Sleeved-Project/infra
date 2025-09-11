@@ -1,6 +1,6 @@
 services:
   api:
-    image: sleevedmanager/iris:v1.0.0
+    image: sleevedmanager/iris:v1.1.0
     ports:
       - "8083:8083"
     depends_on:
