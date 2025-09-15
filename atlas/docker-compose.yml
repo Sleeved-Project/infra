@@ -1,6 +1,6 @@
 services:
   api:
-    image: sleevedmanager/atlas:v1.0.1
+    image: sleevedmanager/atlas:v1.2.0
     ports:
       - "8082:8082"
     depends_on:
